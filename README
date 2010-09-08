@@ -1,0 +1,94 @@
+Rack::FormatResponse
+====================
+
+  A Rack middleware for automatically formatting response body
+
+
+Install
+=======
+
+  gem install rack_format_response
+
+
+Usage
+=====
+
+    use Rack::FormatResponse
+
+  When non-string value is given in response body,
+  it will be passed to Rack::FormatResponse#format_<OBJECT_CLASS>.
+
+
+Example
+=======
+
+  Let's consider about generating json response.
+
+    get "/ping" do
+      {"message"=>"pong"}
+    end
+
+  This code generates "messagepong" response due to response#to_s.
+  So we must write like following with concern about Content-Type.
+
+    get "/ping" do
+      content_type :json
+      hash = {"message"=>"pong"}
+      JSON.dump(hash)
+    end
+
+  This is a pain and not fun!
+
+  Well, with this module, we can enjoy rack with various objects.
+
+    # use Rack::FormatResponse
+    get "/ping" do
+      {"message"=>"pong"}
+    end
+  ->
+    Content-Type: application/json;charset=utf-8
+    {"message":"pong"}
+
+
+Customize
+=========
+
+  When you want automatic formatter from Hash to XML,
+  It would be like this.
+
+    require "rack/format_response"
+    require "active_suport"
+
+    class Rack::FormatResponse
+      def format_hash(hash)
+        hash.to_xml
+      end
+    end
+    Rack::FormatResponse::MAPPINGS["Hash"] = "format_hash"
+
+  or just write code in block.
+
+    Rack::FormatResponse::MAPPINGS["Hash"] = lambda{|hash| hash.to_xml}
+
+
+NOTE
+====
+
+  In default, this module converts hash to json with Yajl gem.
+  Install it first for json use.
+
+    gem install yajl
+
+  # Yajl is a fastest json library where I know
+
+
+Homepage
+========
+
+ http://github.com/maiha/rack_format_response
+
+
+Author
+======
+Maiha <maiha@wota.jp>
+
