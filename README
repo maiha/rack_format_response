@@ -77,7 +77,7 @@ NOTE
   In default, this module converts hash to json with Yajl gem.
   Install it first for json use.
 
-    gem install yajl
+    gem install yajl-ruby
 
   # Yajl is a fastest json library where I know
 

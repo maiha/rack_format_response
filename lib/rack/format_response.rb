@@ -48,20 +48,16 @@ module Rack
 
     def call(env)
       @status, @headers, body = @app.call(env)
-      body = [apply(body)].flatten
+      body = apply(body)
       [@status, @headers, @body || body]
     end
 
     private
-      def lookup(body)
-        body = body[0] if body.class == Array and body.size == 1
-        MAPPINGS[body.class.name] or
-          "format_" + body.class.name.gsub(/::/,'_').downcase
-      end
-
       def apply(data)
-        func = lookup(data)
+        func = MAPPINGS[data.class.name]
         case func
+        when NilClass
+          return data
         when Proc
           return func.call(data)
         when Symbol, String
@@ -74,14 +70,6 @@ module Rack
 
       ######################################################################
       ### Formatters
-
-      def format_array(ary)
-        ary
-      end
-
-      def format_string(str)
-        str
-      end
 
       def format_hash_to_json(hash)
         require 'yajl'
